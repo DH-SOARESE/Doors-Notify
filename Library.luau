@@ -127,7 +127,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         Parent = Template
     })
     
-	local Frame = New("Frame", {
+	local MainFrame = New("Frame", {
         AnchorPoint = Vector2.new(0, 0),
         BackgroundColor3 = Color3.fromRGB(38, 25, 25),
         BackgroundTransparency = 0.3,
@@ -142,7 +142,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         Color = Color3.fromRGB(255, 222, 189),
         Thickness = 3,
         Transparency = 0,
-        Parent = Frame
+        Parent = MainFrame
     })
     
     New("UIPadding", {
@@ -150,12 +150,12 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         PaddingLeft = UDim.new(0.015, 0),
         PaddingRight = UDim.new(0.05, 0),
         PaddingTop = UDim.new(0.05, 0),
-        Parent = Frame
+        Parent = MainFrame
     })
     
     New("UICorner", {
         CornerRadius = UDim.new(0.1, 0),
-        Parent = Frame
+        Parent = MainFrame
     })
     
     local Glow = New("ImageLabel", {
@@ -167,7 +167,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         Position = UDim2.fromScale(-0.5, 0.5),
         Size = UDim2.fromScale(2, 4),
         ZIndex = 1999,
-        Parent = Frame
+        Parent = MainFrame
     })
     
     local Details = New("Frame", {
@@ -176,7 +176,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         Position = UDim2.fromScale(1, 0.5),
         Size = UDim2.fromScale(0.78, 1),
         ZIndex = 2000,
-        Parent = Frame
+        Parent = MainFrame
     })
     
     New("UIListLayout", {
@@ -244,7 +244,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Center,
         ZIndex = 2000,
-        Parent = Frame
+        Parent = MainFrame
     })
 
     local Icon = New("ImageLabel", {
@@ -255,7 +255,7 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         BackgroundTransparency = 0.7,
         ScaleType = Enum.ScaleType.Stretch,
         ZIndex = 2000,
-        Parent = Frame
+        Parent = MainFrame
     })
 
     New("UICorner", {
@@ -268,11 +268,13 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
         Parent = Icon
     })
     
-    return Template, {
+    return {
+    	Achievement = Template,
     	Title = Title, 
     	Description = Description, 
     	SubTitle = SubTitle,
     	Details = Details,
+    	MainFrame = MainFrame,
     	Reason = Reason,
     	Sound = Sound,
     	Outline = Outline,
@@ -289,10 +291,14 @@ function Notification:Notify(Info)
 	task.spawn(function()
 		Info = Validate(Info, Template)
 
-		local Achievement, Objects = Notification.NewTemplate(Notification.Container)
-		Achievement.Size = UDim2.new(0, 0, 0, 0)
-		Achievement.Frame.Position = UDim2.new(1.1, 0, 0, 0)
-		Achievement.Visible = true
+		local Objects = Notification.NewTemplate(Notification.Container)
+		if not Objects then
+			return
+		end
+		
+		Objects.Achievement.Size = UDim2.new(0, 0, 0, 0)
+		Objects.MainFrame.Position = UDim2.new(1.1, 0, 0, 0)
+		Objects.Achievement.Visible = true
 
 		Objects.Title.Text = Info.Title
 		Objects.Description.Text = Info.Description
@@ -308,9 +314,9 @@ function Notification:Notify(Info)
 			Objects.Sound:Play()
 		end
 
-		Achievement:TweenSize(UDim2.new(1, 0, 0.2, 0), "In", "Quad", 0.8, true)
+		Objects.Achievement:TweenSize(UDim2.new(1, 0, 0.2, 0), "In", "Quad", 0.8, true)
 		task.wait(0.8)
-		Achievement.Frame:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.5, true)
+		Objects.MainFrame:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.5, true)
 
 		TweenService:Create(Objects.Glow, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 			ImageTransparency = 1
@@ -318,12 +324,12 @@ function Notification:Notify(Info)
 
 		task.wait(Info.Time)
 		
-		Achievement.Frame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
+		Objects.MainFrame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
 		task.wait(0.5)
-		Achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
+		Objects.Achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
 		task.wait(0.5)
 		
-		Achievement:Destroy()
+		Objects.Achievement:Destroy()
 	end)
 end
 
