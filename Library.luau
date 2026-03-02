@@ -40,7 +40,7 @@ function Validate(Table: { [string]: any }, Template: { [string]: any }): { [str
         end
 
         if typeof(v) == "table" then
-            Table[k] = Library:Validate(Table[k] or {}, v)
+            Table[k] = Validate(Table[k] or {}, v)
         elseif Table[k] == nil then
             Table[k] = v
         end
@@ -282,6 +282,10 @@ function Notification.NewTemplate(Parent: GuiObject): GuiObject
 end
 
 function Notification:Notify(Info)
+	if not Notification.Container then
+		return
+	end
+	
 	task.spawn(function()
 		Info = Validate(Info, Template)
 
@@ -312,15 +316,14 @@ function Notification:Notify(Info)
 			ImageTransparency = 1
 		}):Play()
 
-		task.delay(Info.Time, function()
-			if Achievement and Achievement.Parent then
-				Achievement.Frame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
-				task.wait(0.5)
-				Achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
-				task.wait(0.5)
-				Achievement:Destroy()
-			end
-		end)
+		task.wait(Info.Time)
+		
+		Achievement.Frame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
+		task.wait(0.5)
+		Achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
+		task.wait(0.5)
+		
+		Achievement:Destroy()
 	end)
 end
 
